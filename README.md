@@ -1,16 +1,81 @@
-# React + Vite
+# Java Study Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A full-stack application to track Java concepts learned daily! Built with React (frontend) and Spring Boot (backend).
 
-Currently, two official plugins are available:
+## Features
+- User Registration/Login
+- Personal Dashboard with user's items
+- "Till Now" page with all items from all users
+- Non-case-sensitive search functionality
+- Add new items with photos
+- Password reset using only username
+- Responsive UI
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+### Frontend
+- React 18
+- Vite
+- React Router DOM
+- CSS (custom styling)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Backend
+- Spring Boot 3.3.2
+- Spring Data JPA
+- H2 Database (in-memory)
+- Maven
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### Prerequisites
+- Node.js (18+ recommended)
+- Java 17+
+- Maven
+
+### Installation
+
+#### Frontend
+```bash
+# Navigate to the project root
+npm install
+npm run dev
+```
+
+#### Backend
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+## Usage
+
+1. Open the app at http://localhost:5173 (or whatever port Vite is running on)
+2. Register a new account or login
+3. Use the dashboard to add new Java concepts
+4. Explore "Till Now" to see all items and search through them
+
+## Project Structure
+
+```
+.
+├── src/              # React frontend code
+│   ├── components/   # Reusable components
+│   ├── context/      # Auth context
+│   ├── pages/        # Page components
+│   ├── App.jsx       # Main app component
+│   └── main.jsx      # Entry point
+├── backend/          # Spring Boot backend code
+│   └── src/main/java/com/javastudy/jjj/
+│       ├── controller/
+│       ├── entity/
+│       ├── repository/
+│       └── service/
+└── README.md
+```
+
+## Deployment
+
+The app is ready to deploy! You can deploy the frontend to Vercel/Netlify and the backend to Railway/Heroku.
+
+## License
+MIT
