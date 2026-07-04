@@ -8,6 +8,12 @@ const NoteDetail = () => {
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
     
     const handleLogout = () => {
         logout();

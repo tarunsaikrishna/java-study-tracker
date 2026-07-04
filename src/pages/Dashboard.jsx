@@ -17,19 +17,27 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
+
+    useEffect(() => {
         const loadData = async () => {
-            if (user) {
+            if (user && user.username) {
                 try {
                     const grouped = await fetchUserItemsGrouped(user.username);
                     const today = await fetchUserItemsToday(user.username);
                     await fetchUserDetails(user.username);
-                    setGroupedItems(grouped);
-                    setTodayItems(today);
+                    setGroupedItems(grouped || {});
+                    setTodayItems(today || []);
                 } catch (error) {
                     console.error("Error loading data:", error);
                 } finally {
                     setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
         loadData();

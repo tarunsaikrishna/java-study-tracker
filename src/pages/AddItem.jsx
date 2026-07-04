@@ -13,8 +13,16 @@ const AddItem = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchAllCategories().then(setCategories).catch(console.error);
-    }, [fetchAllCategories]);
+        if (!user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
+
+    useEffect(() => {
+        if (user) {
+            fetchAllCategories().then(setCategories).catch(console.error);
+        }
+    }, [fetchAllCategories, user]);
 
     const filteredCategories = categories.filter(cat => 
         cat.toLowerCase().includes(categorySearch.toLowerCase())

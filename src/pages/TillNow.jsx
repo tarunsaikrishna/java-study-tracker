@@ -18,6 +18,12 @@ const TillNow = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (!user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
+
     const loadAllItems = async () => {
         try {
             setLoading(true);

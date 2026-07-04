@@ -7,11 +7,56 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [items, setItems] = useState([]);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+    // Define all fetch functions first to avoid dependency cycles
+    const fetchUserDetails = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/auth/user/${username}`);
+        const data = await response.json();
+        if (response.ok) {
+            setUser(prev => prev ? { ...prev, streak: data.streak, lastActiveDate: data.lastActiveDate } : data);
         }
+        return data;
+    }, []);
+
+    const fetchAllItems = useCallback(async () => {
+        const response = await fetch(`${API_BASE_URL}/items`);
+        const data = await response.json();
+        setItems(data);
+        return data;
+    }, []);
+
+    const fetchUserItems = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/items/author/${username}`);
+        return await response.json();
+    }, []);
+
+    const fetchUserItemsGrouped = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/items/author/${username}/grouped`);
+        return await response.json();
+    }, []);
+
+    const fetchUserItemsToday = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/items/author/${username}/today`);
+        return await response.json();
+    }, []);
+
+    const fetchAllCategories = useCallback(async () => {
+        const response = await fetch(`${API_BASE_URL}/items/categories`);
+        return await response.json();
+    }, []);
+
+    const fetchItemsByCategory = useCallback(async (category) => {
+        const response = await fetch(`${API_BASE_URL}/items/category/${encodeURIComponent(category)}`);
+        return await response.json();
+    }, []);
+
+    const searchItems = useCallback(async (query) => {
+        const response = await fetch(`${API_BASE_URL}/items/search?q=${encodeURIComponent(query)}`);
+        return await response.json();
+    }, []);
+
+    const fetchItemById = useCallback(async (id) => {
+        const response = await fetch(`${API_BASE_URL}/items/${id}`);
+        return await response.json();
     }, []);
 
     const register = useCallback(async (username, password) => {
@@ -68,43 +113,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
     }, []);
 
-    const fetchAllItems = useCallback(async () => {
-        const response = await fetch(`${API_BASE_URL}/items`);
-        const data = await response.json();
-        setItems(data);
-        return data;
-    }, []);
-
-    const fetchUserItems = useCallback(async (username) => {
-        const response = await fetch(`${API_BASE_URL}/items/author/${username}`);
-        return await response.json();
-    }, []);
-
-    const fetchUserItemsGrouped = useCallback(async (username) => {
-        const response = await fetch(`${API_BASE_URL}/items/author/${username}/grouped`);
-        return await response.json();
-    }, []);
-
-    const fetchUserItemsToday = useCallback(async (username) => {
-        const response = await fetch(`${API_BASE_URL}/items/author/${username}/today`);
-        return await response.json();
-    }, []);
-
-    const fetchAllCategories = useCallback(async () => {
-        const response = await fetch(`${API_BASE_URL}/items/categories`);
-        return await response.json();
-    }, []);
-
-    const fetchItemsByCategory = useCallback(async (category) => {
-        const response = await fetch(`${API_BASE_URL}/items/category/${encodeURIComponent(category)}`);
-        return await response.json();
-    }, []);
-
-    const searchItems = useCallback(async (query) => {
-        const response = await fetch(`${API_BASE_URL}/items/search?q=${encodeURIComponent(query)}`);
-        return await response.json();
-    }, []);
-
     const addItem = useCallback(async (item) => {
         const response = await fetch(`${API_BASE_URL}/items`, {
             method: 'POST',
@@ -136,19 +144,23 @@ export const AuthProvider = ({ children }) => {
         return data;
     }, []);
 
-    const fetchItemById = useCallback(async (id) => {
-        const response = await fetch(`${API_BASE_URL}/items/${id}`);
-        return await response.json();
-    }, []);
-
-    const fetchUserDetails = useCallback(async (username) => {
-        const response = await fetch(`${API_BASE_URL}/auth/user/${username}`);
-        const data = await response.json();
-        if (response.ok) {
-            setUser(prev => prev ? { ...prev, streak: data.streak, lastActiveDate: data.lastActiveDate } : data);
-        }
-        return data;
-    }, []);
+    useEffect(() => {
+        const initUser = async () => {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+                if (parsedUser.username) {
+                    try {
+                        await fetchUserDetails(parsedUser.username);
+                    } catch (e) {
+                        console.error("Error fetching user details:", e);
+                    }
+                }
+            }
+        };
+        initUser();
+    }, [fetchUserDetails]);
 
     return (
         <AuthContext.Provider value={{ 
