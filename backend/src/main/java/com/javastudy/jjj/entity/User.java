@@ -14,12 +14,17 @@ public class User {
     
     @Column(nullable = false)
     private String password;
+    
+    private int streak;
+    
+    private String lastActiveDate;
 
     public User() {}
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+        this.streak = 0;
     }
 
     public Long getId() {
@@ -44,5 +49,21 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getStreak() {
+        return streak;
+    }
+
+    public void setStreak(int streak) {
+        this.streak = streak;
+    }
+
+    public String getLastActiveDate() {
+        return lastActiveDate;
+    }
+
+    public void setLastActiveDate(String lastActiveDate) {
+        this.lastActiveDate = lastActiveDate;
     }
 }

@@ -5,6 +5,7 @@ import com.javastudy.jjj.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -35,6 +36,33 @@ public class UserService {
         }
         User user = userOpt.get();
         user.setPassword(newPassword);
+        return userRepository.save(user);
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public User updateStreak(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        User user = userOpt.get();
+        String today = LocalDate.now().toString();
+        String lastActive = user.getLastActiveDate();
+        
+        if (lastActive == null) {
+            user.setStreak(1);
+        } else {
+            LocalDate lastDate = LocalDate.parse(lastActive);
+            if (lastDate.equals(LocalDate.now().minusDays(1))) {
+                user.setStreak(user.getStreak() + 1);
+            } else if (!lastDate.equals(LocalDate.now())) {
+                user.setStreak(1);
+            }
+        }
+        user.setLastActiveDate(today);
         return userRepository.save(user);
     }
 }

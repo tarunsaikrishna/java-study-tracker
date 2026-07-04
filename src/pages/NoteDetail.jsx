@@ -6,6 +6,7 @@ const NoteDetail = () => {
     const { id } = useParams();
     const { fetchItemById, user, logout } = useAuth();
     const [item, setItem] = useState(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     
     const handleLogout = () => {
@@ -15,11 +16,35 @@ const NoteDetail = () => {
 
     useEffect(() => {
         const loadItem = async () => {
-            const data = await fetchItemById(id);
-            setItem(data);
+            try {
+                const data = await fetchItemById(id);
+                setItem(data);
+            } catch (error) {
+                console.error("Error loading item:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         loadItem();
     }, [id, fetchItemById]);
+
+    if (loading) {
+        return (
+            <div className="note-detail-container">
+                <nav className="navbar">
+                    <h1>Java Study Tracker</h1>
+                    <div className="nav-links">
+                        <Link to="/dashboard">My Dashboard</Link>
+                        <Link to="/till-now">Till Now</Link>
+                        <button onClick={handleLogout} className="logout-btn">Logout</button>
+                    </div>
+                </nav>
+                <div className="note-detail-content">
+                    <h2>Loading...</h2>
+                </div>
+            </div>
+        );
+    }
 
     if (!item) {
         return (
@@ -33,7 +58,8 @@ const NoteDetail = () => {
                     </div>
                 </nav>
                 <div className="note-detail-content">
-                    <h2>Loading...</h2>
+                    <h2>Item not found!</h2>
+                    <Link to="/till-now">Go back to Till Now</Link>
                 </div>
             </div>
         );
@@ -55,6 +81,7 @@ const NoteDetail = () => {
             <div className="note-detail-content">
                 <div className="note-header">
                     <h2>{item.title}</h2>
+                    {item.category && <span className="item-category">{item.category}</span>}
                     <div className="note-meta">
                         <span>Added by: {item.author}</span>
                         <span>Date: {item.date}</span>

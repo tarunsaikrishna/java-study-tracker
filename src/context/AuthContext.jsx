@@ -77,14 +77,32 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserItems = useCallback(async (username) => {
         const response = await fetch(`${API_BASE_URL}/items/author/${username}`);
-        const data = await response.json();
-        return data;
+        return await response.json();
+    }, []);
+
+    const fetchUserItemsGrouped = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/items/author/${username}/grouped`);
+        return await response.json();
+    }, []);
+
+    const fetchUserItemsToday = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/items/author/${username}/today`);
+        return await response.json();
+    }, []);
+
+    const fetchAllCategories = useCallback(async () => {
+        const response = await fetch(`${API_BASE_URL}/items/categories`);
+        return await response.json();
+    }, []);
+
+    const fetchItemsByCategory = useCallback(async (category) => {
+        const response = await fetch(`${API_BASE_URL}/items/category/${encodeURIComponent(category)}`);
+        return await response.json();
     }, []);
 
     const searchItems = useCallback(async (query) => {
         const response = await fetch(`${API_BASE_URL}/items/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        return data;
+        return await response.json();
     }, []);
 
     const addItem = useCallback(async (item) => {
@@ -97,7 +115,8 @@ export const AuthProvider = ({ children }) => {
                 title: item.title,
                 note: item.note,
                 author: user.username,
-                photos: item.photos ? item.photos.join(',') : ''
+                photos: item.photos ? item.photos.join(',') : '',
+                category: item.category
             })
         });
         const data = await response.json();
@@ -105,9 +124,30 @@ export const AuthProvider = ({ children }) => {
         return data;
     }, [user]);
 
+    const deleteItem = useCallback(async (itemId, author) => {
+        const response = await fetch(`${API_BASE_URL}/items/${itemId}?author=${encodeURIComponent(author)}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error);
+        }
+        setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+        return data;
+    }, []);
+
     const fetchItemById = useCallback(async (id) => {
         const response = await fetch(`${API_BASE_URL}/items/${id}`);
         return await response.json();
+    }, []);
+
+    const fetchUserDetails = useCallback(async (username) => {
+        const response = await fetch(`${API_BASE_URL}/auth/user/${username}`);
+        const data = await response.json();
+        if (response.ok) {
+            setUser(prev => prev ? { ...prev, streak: data.streak, lastActiveDate: data.lastActiveDate } : data);
+        }
+        return data;
     }, []);
 
     return (
@@ -119,10 +159,16 @@ export const AuthProvider = ({ children }) => {
             resetPassword,
             logout, 
             addItem,
+            deleteItem,
             fetchAllItems,
             fetchUserItems,
+            fetchUserItemsGrouped,
+            fetchUserItemsToday,
+            fetchAllCategories,
+            fetchItemsByCategory,
             searchItems,
-            fetchItemById
+            fetchItemById,
+            fetchUserDetails
         }}>
             {children}
         </AuthContext.Provider>

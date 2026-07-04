@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AddItem = () => {
     const [title, setTitle] = useState('');
     const [note, setNote] = useState('');
+    const [category, setCategory] = useState('');
+    const [categorySearch, setCategorySearch] = useState('');
     const [photos, setPhotos] = useState([]);
-    const { addItem, user, logout } = useAuth();
+    const [categories, setCategories] = useState([]);
+    const { addItem, fetchAllCategories, user, logout } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchAllCategories().then(setCategories).catch(console.error);
+    }, [fetchAllCategories]);
+
+    const filteredCategories = categories.filter(cat => 
+        cat.toLowerCase().includes(categorySearch.toLowerCase())
+    );
 
     const handleLogout = () => {
         logout();
@@ -23,7 +34,7 @@ const AddItem = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (title.trim() && note.trim()) {
-            await addItem({ title, note, photos });
+            await addItem({ title, note, category: category.trim(), photos });
             navigate('/dashboard');
         }
     };
@@ -63,6 +74,22 @@ const AddItem = () => {
                             placeholder="Enter detailed notes about this concept"
                             rows={8}
                         />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Category</label>
+                        <input
+                            type="text"
+                            list="categories"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            placeholder="Select or enter a category"
+                        />
+                        <datalist id="categories">
+                            {filteredCategories.map(cat => (
+                                <option key={cat} value={cat} />
+                            ))}
+                        </datalist>
                     </div>
                     
                     <div className="form-group">

@@ -25,6 +25,7 @@ public class AuthController {
             Map<String, Object> response = new HashMap<>();
             response.put("username", user.getUsername());
             response.put("id", user.getId());
+            response.put("streak", user.getStreak());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -42,6 +43,8 @@ public class AuthController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("username", user.getUsername());
                 response.put("id", user.getId());
+                response.put("streak", user.getStreak());
+                response.put("lastActiveDate", user.getLastActiveDate());
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
@@ -61,6 +64,25 @@ public class AuthController {
             response.put("message", "Password reset successfully");
             response.put("username", user.getUsername());
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<?> getUser(@PathVariable String username) {
+        try {
+            Optional<User> userOpt = userService.getUserByUsername(username);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("username", user.getUsername());
+                response.put("streak", user.getStreak());
+                response.put("lastActiveDate", user.getLastActiveDate());
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

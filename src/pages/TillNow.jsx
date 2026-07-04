@@ -1,15 +1,24 @@
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 const TillNow = () => {
-    const { fetchAllItems, searchItems, logout } = useAuth();
+    const { 
+        fetchAllItems, 
+        searchItems, 
+        fetchAllCategories,
+        fetchItemsByCategory,
+        user, 
+        logout 
+    } = useAuth();
     const [items, setItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const loadAllItems = useCallback(async () => {
+    const loadAllItems = async () => {
         try {
             setLoading(true);
             const data = await fetchAllItems();
@@ -19,11 +28,12 @@ const TillNow = () => {
         } finally {
             setLoading(false);
         }
-    }, [fetchAllItems]);
+    };
 
     useEffect(() => {
         loadAllItems();
-    }, [loadAllItems]);
+        fetchAllCategories().then(setCategories).catch(console.error);
+    }, [fetchAllItems, fetchAllCategories]);
 
     useEffect(() => {
         const debounceTimer = setTimeout(async () => {
@@ -37,13 +47,28 @@ const TillNow = () => {
                 } finally {
                     setLoading(false);
                 }
+            } else if (selectedCategory) {
+                try {
+                    setLoading(true);
+                    const results = await fetchItemsByCategory(selectedCategory);
+                    setItems(results);
+                } catch (error) {
+                    console.error("Error loading category items:", error);
+                } finally {
+                    setLoading(false);
+                }
             } else {
                 await loadAllItems();
             }
         }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchTerm, searchItems, loadAllItems]);
+    }, [searchTerm, selectedCategory, searchItems, fetchItemsByCategory]);
+
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+        setSearchTerm('');
+    };
 
     const handleLogout = () => {
         logout();
@@ -64,13 +89,26 @@ const TillNow = () => {
             <div className="till-now-content">
                 <h2>All Items Added Till Now</h2>
                 
-                <div className="search-form">
-                    <input
-                        type="text"
-                        placeholder="Search items by title, note, or author (case-insensitive)..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="filters-container">
+                    <div className="search-form">
+                        <input
+                            type="text"
+                            placeholder="Search items by title, note, or author (case-insensitive)..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="category-filter">
+                        <select
+                            value={selectedCategory}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="">All Categories</option>
+                            {categories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 
                 <div className="items-list">
@@ -84,6 +122,7 @@ const TillNow = () => {
                                 <tr>
                                     <th>S.No</th>
                                     <th>Title</th>
+                                    <th>Category</th>
                                     <th>Added by</th>
                                     <th>Date</th>
                                     <th>Action</th>
@@ -94,6 +133,7 @@ const TillNow = () => {
                                     <tr key={item.id}>
                                         <td>{index + 1}</td>
                                         <td>{item.title}</td>
+                                        <td>{item.category || "-"}</td>
                                         <td>{item.author}</td>
                                         <td>{item.date}</td>
                                         <td>

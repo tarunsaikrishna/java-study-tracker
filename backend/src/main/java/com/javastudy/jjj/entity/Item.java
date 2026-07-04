@@ -23,16 +23,19 @@ public class Item {
     private LocalDate date;
     
     @Column(columnDefinition = "TEXT")
-    private String photos; // We'll store photos as comma-separated URLs or base64 strings for simplicity
+    private String photos;
+    
+    private String category;
 
     public Item() {}
 
-    public Item(String title, String note, String author, LocalDate date, String photos) {
+    public Item(String title, String note, String author, LocalDate date, String photos, String category) {
         this.title = title;
         this.note = note;
         this.author = author;
         this.date = date;
         this.photos = photos;
+        this.category = category;
     }
 
     public Long getId() {
@@ -81,5 +84,13 @@ public class Item {
 
     public void setPhotos(String photos) {
         this.photos = photos;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
