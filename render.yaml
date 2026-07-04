@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: java-study-tracker-backend
+    env: java
+    plan: free
+    buildCommand: cd backend && mvn clean install -DskipTests
+    startCommand: cd backend && java -jar target/jjj-backend-1.0.0.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: java-study-tracker-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_DRIVER
+        value: org.postgresql.Driver
+      - key: SPRING_JPA_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: java-study-tracker-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: java-study-tracker-db
+          property: password
+    autoDeploy: true
+    rootDir: ./
+
+databases:
+  - name: java-study-tracker-db
+    plan: free
+    ipAllowList: []
