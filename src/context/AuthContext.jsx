@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 const API_BASE_URL = 'http://localhost:8081/api';
@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    const register = async (username, password) => {
+    const register = useCallback(async (username, password) => {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
@@ -29,9 +29,9 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
         localStorage.setItem('user', JSON.stringify(data));
         return data;
-    };
+    }, []);
 
-    const login = async (username, password) => {
+    const login = useCallback(async (username, password) => {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
@@ -46,9 +46,9 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
         localStorage.setItem('user', JSON.stringify(data));
         return data;
-    };
+    }, []);
 
-    const resetPassword = async (username, newPassword) => {
+    const resetPassword = useCallback(async (username, newPassword) => {
         const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
             method: 'POST',
             headers: {
@@ -61,33 +61,33 @@ export const AuthProvider = ({ children }) => {
             throw new Error(data.error);
         }
         return data;
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setUser(null);
         localStorage.removeItem('user');
-    };
+    }, []);
 
-    const fetchAllItems = async () => {
+    const fetchAllItems = useCallback(async () => {
         const response = await fetch(`${API_BASE_URL}/items`);
         const data = await response.json();
         setItems(data);
         return data;
-    };
+    }, []);
 
-    const fetchUserItems = async (username) => {
+    const fetchUserItems = useCallback(async (username) => {
         const response = await fetch(`${API_BASE_URL}/items/author/${username}`);
         const data = await response.json();
         return data;
-    };
+    }, []);
 
-    const searchItems = async (query) => {
+    const searchItems = useCallback(async (query) => {
         const response = await fetch(`${API_BASE_URL}/items/search?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         return data;
-    };
+    }, []);
 
-    const addItem = async (item) => {
+    const addItem = useCallback(async (item) => {
         const response = await fetch(`${API_BASE_URL}/items`, {
             method: 'POST',
             headers: {
@@ -101,14 +101,14 @@ export const AuthProvider = ({ children }) => {
             })
         });
         const data = await response.json();
-        setItems([...items, data]);
+        setItems(prevItems => [...prevItems, data]);
         return data;
-    };
+    }, [user]);
 
-    const fetchItemById = async (id) => {
+    const fetchItemById = useCallback(async (id) => {
         const response = await fetch(`${API_BASE_URL}/items/${id}`);
         return await response.json();
-    };
+    }, []);
 
     return (
         <AuthContext.Provider value={{ 

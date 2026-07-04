@@ -1,15 +1,15 @@
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const TillNow = () => {
-    const { fetchAllItems, searchItems, user, logout } = useAuth();
+    const { fetchAllItems, searchItems, logout } = useAuth();
     const [items, setItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const loadAllItems = async () => {
+    const loadAllItems = useCallback(async () => {
         try {
             setLoading(true);
             const data = await fetchAllItems();
@@ -19,11 +19,11 @@ const TillNow = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetchAllItems]);
 
     useEffect(() => {
         loadAllItems();
-    }, [fetchAllItems]);
+    }, [loadAllItems]);
 
     useEffect(() => {
         const debounceTimer = setTimeout(async () => {
